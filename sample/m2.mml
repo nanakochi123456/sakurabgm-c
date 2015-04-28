@@ -1,0 +1,350 @@
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+//
+// coneco.net 体験レビュー用？
+// (m2.bgm)
+//
+// 作詞：いないの
+// 作曲：ななこっち★ @1990/10/05
+// 著作者：ななこっち★
+// MMLかき：ななこっち★ @2013/04/21
+// ライセンス：CC BY-SA (表示、継承）
+// http://creativecommons.org/licenses/by-sa/2.1/jp/
+//
+// 奨励音源
+// TiMidiTy
+// http://www.daiba.cx/TiMidity%2b%2b/
+//
+// このレビューは、企業から無料で提供された製品に対して消費者の視点で
+// レビューをおこなう、coneco.netの体験レビューとして作成されています。
+// http://www.coneco.net/taiken/
+//
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+// 変更履歴：
+// v1.3 sakurabgm対応
+// v1.2 ループ数の指定を変数にするために、ループマクロを作成
+//      追加でSoundEngineのパラメータを掲載
+// v1.1 ish があったら、エラーになるので、抜いた
+//      音バグあったので、変更(移植バグとはいえない、致命的なもの・・)
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+//
+// sakurabgm 定義
+//
+Int LOOP=3 		//sakurabgm:ループ数の指定,MIN=1,DEFAULT=3,MAX=50
+Tempo 142 		//sakurabgm:曲の速さ,MIN=80=遅い,DEFAULT=142=標準,MAX=300,速い
+Key (0) 		//sakurabgm:調性,MIN=-12,低い,DEFAULT=0=標準,MAX=12=高い
+Str NAME={"編集後記"}
+Str AUTHOR={"なの"}
+Str TIMIDITYCFG={"m2-gmset.cfg=GMセット,m2-opl3+opll.cfg=FM音源"}
+Str COMMENT={"MSXで作成した曲をリメイクしました。\nFM音源、SCC音源、PSG音源ライクな音色に仕上がっています。\nテンポをかなり早くするとサンバ風になるかもしれません。"}
+Str LICENSE={"CC BY-SA"}
+Str GENRE={"POP"}
+Str LICENSEURL={"http://creativecommons.org/licenses/by-sa/2.1/jp/"}
+Str SAKURAURL={"http://oto.chu.jp/mmlbbs6/post.php?mml_id=1550"}
+Str CHORD={"A"}
+//
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+REV(100)
+
+LOOP=LOOP+1
+Int LOOP2=LOOP
+
+Function LoopPlay(Str Mml, Int count) {
+	Str _MML
+	For (Int i = 1; i < LOOP + count; i++) {
+		_MML=_MML + #STR(Mml)
+	}
+	_MML
+}
+
+#PEDALON={Sub {r16y64,127}}
+#PEDALOFF={r-32 y64,0 r32}
+
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+// メロディー
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+Function OT(Int V1, Int V2, Int L) {
+	Sub {
+		Expression.onTime(V1,V2,L)
+		r%(L)
+		Expression(V1)
+	}
+}
+
+#MELODY1={
+	[3 r1]
+	r2.e8r8>
+
+	//
+	OT(127,90,!1^8)c#1^8c#cc#dere&
+	OT(127,90,!2)e2rdr<OT(127,90,!^2.)a
+	^2.r4
+
+	>e4d8<OT(127,80,!^1)a8^1
+	OT(127,90,!2)b2>
+	OT(127,90,!1.)c#1.
+	r4e8r8>
+
+	OT(127,100,!1^8)c#1^8c#cc#dere&
+	OT(127,100,!2)e2rdr<a&
+	OT(127,100,!2.)a2.r4
+
+	>e4d8<OT(127,80,!1^8)a8^1
+	OT(127,110,!1^8)b2
+	OT(127,100,!1.)a1.r2
+}
+
+#MELODY2={
+	a2^8g#ab
+	rarg#rf#re&
+	e1.
+	rc#de
+	e4d<a^2>
+	e4d<a^4b4>
+	c#1.
+	r2
+	a2^8g#ab
+	rarg#rf#re&
+	e1.
+	rc#de
+	e4d<a^2>
+	e4d<a^4b4
+	a1.r2
+}
+#TR1={
+	音色(Piccolo)
+	#MELODY1
+		
+	音色(Strings1)
+	#MELODY2
+}
+
+#TR2={
+	音色(Piccolo)
+	#MELODY1
+		
+	音色(Piccolo)
+	#MELODY2
+}
+
+トラック 1;
+
+o5l8v127q99
+
+LoopPlay(#TR1)
+
+トラック 2;
+o6l8v127q99
+
+LoopPlay(#TR2)
+
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+// コード
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+#TR5={
+	'a>c#e<'r 'a4>c#4e4<'
+	r'g#>c#e<' r'g#>c#e<'
+	r'g>c#e<' 'g4>c#4e4<'
+	r'g#>c#e<' r'g#>c#e<'
+
+	'b8>d8f#8<'r 'b4>d4f#4<'
+	r'a>df#<' r'a>df#<'
+	r4'g#2.>d2.g2.<'
+
+	//
+
+	'a>c#e<'r 'a4>c#4e4<'
+	r'g#>c#e<' r'g#>c#e<'
+	r'g>c#e<' 'g4>c#4e4<'
+	r'g#>c#e<' r'g#>c#e<'
+
+	'a>df#<'r 'a4>d4f#4<'
+	r'a>df#<' r'a>df#<'
+	r'a>df#<' 'a4>d4f#4<'
+	r'a>df#<' r'a>df#<'
+
+	'b>df#<'r 'b4>d4f#4<'
+	r'b>df#<' r'b>df#<'
+	r'g#>df#<' 'g#4>d4f#4<'
+	r'g#>df#<' r'g#>df<'
+
+	'a>c#e<'r 'a4>c#4e4<'
+	r'a>c#e<' r'a>c#e<'
+	r'b>df#<' 'b4>d4f#4<'
+	r'g#>df#<' r'g#>df<'
+
+	'a>c#e<'r 'a4>c#4e4<'
+	r'g#>c#e<' r'g#>c#e<'
+	r'g>c#e<' 'g4>c#4e4<'
+	r'g#>c#e<' r'g#>c#e<'
+
+	'a>df#<'r 'a4>d4f#4<'
+	r'a>df#<' r'a>df#<'
+	r'a>df#<' 'a4>d4f#4<'
+	r'a>df#<' r'a>df#<'
+
+	'b>df#<'r 'b4>d4f#4<'
+	r'b>df#<' r'b>df#<'
+	r'g#>df#<' 'g#4>d4f#4<'
+	r'g#>df#<' r'g#>df<'
+
+	'a>c#e<'r 'a4>c#4e4<'
+	r'a>c#e<' r'a>c#e<'
+	r'a>c#e<' 'a4>c#4e4<'
+	r'a>c#e<' r'a>c#e<'
+
+
+	[2
+		'a>df#<'r 'a4>d4f#4<'
+		r'a>df#<' r'a>df#<'
+		r'a>df#<' 'a4>d4f#4<'
+		r'a>df#<' r'a>df<'
+
+		'a>c#e<'r 'a4>c#4e4<'
+		r'a>c#e<' r'a>c#e<'
+		r'a>c#e<' 'a4>c#4e4<'
+		r'a>c#e<' r'a>c#e<'
+
+		'b>df#<'r 'b4>d4f#4<'
+		r'b>df#<' r'b>df#<'
+		r'g#>df#<' 'g#4>d4f#4<'
+		r'g#>df#<' r'g#>df<'
+
+		'a>c#e<'r 'a4>c#4e4<'
+		r'a>c#e<' r'a>c#e<'
+		r'a>c#e<' 'a4>c#4e4<'
+		r'a>c#e<' r'a>c#e<'
+
+	]
+}
+
+トラック 5;
+音色(JazzGuitar)
+o4l8q80v100
+
+LoopPlay(#TR5)
+
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+// ベース
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+#TR9={
+	a4ra e4re
+	a4ra e4re
+	b4rb f#4rb
+	r4e2.
+
+	a4ra e4re
+	a4ra e4r>c#
+	d4rd <a4ra>
+	d4rd <a4ra#
+
+	b4rf# f#4rb
+	e4rb  b4re
+	a4ra a4ra
+	b4rb ree4
+
+	a4ra e4re
+	a4ra e4r>c#
+	d4rd <a4ra>
+	d4rd <a4ra#
+
+	b4rf# f#4rb
+	e4rb  b4re
+	a4ra e4re
+	a4ra e4rd#
+
+	d4rd <a4ra>
+	d4r<a> def#g#
+	a4ra e4re
+	a4ra e4re
+
+	b4rf# f#4rb
+	e4rb  b4re
+	a4ra e4re
+	a4ra e4rd#
+
+	d4rd a4ra
+	d4r<a> def#g#
+	a4ra e4re
+	a4ra e4re
+
+	b4rf# f#4rb
+	e4rb  b4re
+	a4ra e4re
+	a4ra e4re
+}
+
+トラック 9;
+音色(FretlessBass)
+o3l8q80v100
+
+LoopPlay(#TR9)
+
+トラック 10;
+Key 0
+$m{n(MidTom2),}
+$l{n(LowTom1),}
+$t{n(HighTom1),}
+$b{n(Kick1),}
+$s{n(Snare1),}
+$S{n(Snare2),}
+
+//$t{n(Tambourine),}
+$h{n(MuteTriangle),}
+$o{n(OpenTriangle),}
+$c{n(ChineseCymbal),}
+
+#r1={
+	Sub {
+		Rythm {
+			h8h8h8o4h8h8o8
+		}
+	}
+	Rythm {
+		b8s8S8b8b8s8S8b8
+	}
+}
+
+#r2={
+	Rythm {
+		'b4h4''c2o2'b4
+	}
+}
+
+#r3={
+	Sub {
+		Rythm {
+			h8h8h8o4h8h8o8
+		}
+	}
+	Rythm {
+		b8s8S8b8b8m8l8b8
+	}
+}
+#r4={
+	Sub {
+		Rythm {
+			h8h8h8o4h8h8o8
+		}
+	}
+	Rythm {
+		b8s8S8b8b8t8m8l8
+	}
+}
+
+#R10={
+	[3 #r1]
+	#r2
+	[7 #r1]
+	#r3
+	[7 #r1]
+	#r4
+	[7 #r1]
+	#r4
+	[7 #r1]
+	#r3
+}
+LoopPlay(#R10)

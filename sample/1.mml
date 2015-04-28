@@ -1,0 +1,768 @@
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+//
+// coneco.net 体験レビュー用？
+//
+// 作詞：いないの
+// 作曲：ななこっち★ @2013/04/20
+// 著作者：ななこっち★
+// MMLかき：ななこっち★ @2013/04/20
+// 最終変更：ななこっち★ @2013/04/22
+// ライセンス：CC BY-SA (表示、継承）
+// http://creativecommons.org/licenses/by-sa/2.1/jp/
+//
+// 奨励音源
+// TiMidiTy
+// http://www.daiba.cx/TiMidity%2b%2b/
+//
+// このレビューは、企業から無料で提供された製品に対して消費者の視点で
+// レビューをおこなう、coneco.netの体験レビューとして作成されています。
+// http://www.coneco.net/taiken/
+//
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+// 変更履歴：
+// v1.1 ループ数の指定を変数にするために、ループマクロを作成
+//      追加でSoundEngineのパラメータを掲載
+// v1.2 sakurabgm用に変更
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+//
+// sakurabgm 定義
+//
+Int LOOP=3 		//sakurabgm:ループ数の指定,MIN=1,DEFAULT=3,MAX=50
+Tempo 100 		//sakurabgm:曲の速さ,MIN=60=遅い,DEFAULT=100=標準,MAX=160,速い
+Key (0) 		//sakurabgm:調性,MIN=-12,低い,DEFAULT=0=標準,MAX=12=高い
+Int NODTM=1		//sakurabgm:演奏の自然さ,MIN=0=DTM,DEFAULT=1=標準（上手),MAX=3=へたくそ
+Str NAME={"春のそよ風に"}
+Str AUTHOR={"なの"}
+Str TIMIDITYCFG={"1-WithPiccoro.cfg=ピッコロとクラリネット,1-WithoutPiccoro.wav=バイオリン"}
+Str COMMENT={"レビュー商品として、相場価格15万円～17万円の商品が当選してしまった？\nあまりの驚きに、全てのレビュー曲を自分で作曲してしまおうという試みから\n初めて、作ってみた第１弾の曲です。"}
+Str LICENSE={"CC BY-SA"}
+Str GENRE={"POP"}
+Str LICENSEURL={"http://creativecommons.org/licenses/by-sa/2.1/jp/"}
+Str URL={"http://club.coneco.net/user/41992/review/119458/"}
+Str SAKURAURL={"http://oto.chu.jp/mmlbbs6/post.php?mml_id=1215"}
+Str CHORD={"F"}
+//
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+System.TimeBase=10368
+Expression.Frequency(1);
+Modulation.Frequency(1);
+
+LOOP=LOOP+1
+Int LOOP2=LOOP-1
+
+#PEDALON={Sub {r16y64,127}}
+#PEDALOFF={r-32 y64,0 r32}
+
+Function LoopPlay(Str Mml, Int count) {
+	Str _MML
+	For (Int i = 1; i < LOOP + count; i++) {
+		_MML=_MML + #STR(Mml)
+	}
+	_MML
+}
+
+Function BG(Str MML) {
+　　Str BUF=""
+    Str FIRST=""
+　　Str ML=""
+　　Str M
+　　Str R
+    Str FM
+    Int C=0
+
+　　BUF=""
+    R=""
+　　For(Int i=1; MID(MML, i, 1)!=""; i++) {
+　　　　M=MID(MML, i, 1)
+　　　　IF(M="a"||M="b"||M="c"||M="d"||M="e"||M="f"||M="g") {
+		C++
+	  	IF(C<3) {
+			FIRST=ML
+			ML=FM+M
+			FM=""
+		} ELSE {
+			IF(NODTM=1) {
+		　　　　　　R=R+"r"+Random(384,1024)
+			}
+			IF(NODTM=2) {
+		　　　　　　R=R+"r"+Random(192,512)
+			}
+			IF(NODTM=3) {
+		　　　　　　R=R+"r"+Random(96,384)
+			}
+　　　　		BUF=BUF+"Sub" + CHR(123)+R+ML+CHR(125)
+	　　　　　　ML=M
+		}
+　　　　} ELSE {
+		IF(C>0) {
+　　　　　　	ML=ML+M
+		} ELSE {
+			FM=FM+M
+		}
+　　　　}
+　　}
+　　BUF="Sub"+CHR(123)+FIRST+CHR(125)+BUF+"Sub"+CHR(123)+R+ML+CHR(125)+"r"
+//    Print(BUF)
+//	IF(GAKUHU=1) {
+//		BUF="'"+MML+"'"
+//	}
+　　BUF
+}
+
+Function RandV(Int MIN, Int MAX) {
+	Str MML="v"
+	IF(NODTM>0) {
+		MML=MML+Random(MIN,MAX)
+	} ELSE {
+		MML=MML+#STR((MAX+MIN)/2)
+	}
+//	Print(MML)
+	MML
+}
+
+Str RMML
+Function RandR(Int MIN, Int MAX) {
+	Str MML
+//	Str MML=RMML
+//	RMML=""
+	IF(NODTM>0) {
+		MML=MML+"r"
+		RMML=RMML+"r"
+		Int VALUE=Random(0,10)
+		IF(VALUE<5) {
+			MML=MML+"-"
+		} ELSE {
+			RMML=RMML+"-"
+		}
+		Str RAND
+		IF(NODTM=1) {
+			RAND=Random(MIN,MAX)
+		}
+		IF(NODTM=2) {
+			RAND=Random(MIN / 5 ,MAX / 5)
+		}
+		IF(NODTM=3) {
+			RAND=Random(MIN / 9 ,MAX / 9)
+		}
+		MML=MML+RAND
+		RMML=RMML+RAND
+//		Print(MML)
+		MML
+	}
+}
+
+Function SyncR() {
+	Str MML=RMML
+	RMML=""
+//	Print(MML)
+	MML
+}
+
+// シンバルのロテート
+Int CYMINIT=0
+Int SNAREINIT=0
+Int BDINIT=0
+
+Function BassDrum() {
+	Int CC
+	IF(TIMIDITY=0) {
+		CC=Kick1
+	} ELSE {
+		IF(BDINIT=0) {
+			CC=Kick1
+			BDINIT=1
+		} ELSE {
+				CC=Kick2
+			BDINIT=0
+		}
+	}
+	Result=CC
+}
+
+
+Function Snare() {
+	Int CC
+	IF(TIMIDITY=0) {
+		CC=Snare1
+	} ELSE {
+		IF(SNAREINIT=0) {
+			CC=Snare1
+			SNAREINIT=1
+		} ELSE {
+				CC=Snare2
+			SNAREINIT=0
+		}
+	}
+	Result=CC
+}
+
+Function Cymbal() {
+	Int CC
+	IF(CYMINIT=0) {
+		CC=CrashCymbal1
+		CYMINIT=1
+	} ELSE {
+		CC=CrashCymbal2
+		CYMINIT=0
+	}
+	Result=CC
+}
+
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+// メロディー
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+#MELODY={
+	[3 r1]
+	r2.r8 Expression(127) v110 c16r16
+	Expression.onTime(127,115,!2) v127 f4.v115 c8 Expression.onTime(120,125,!8.)v115 a8b- Expression.onTime(125,110,!4)a^8f8
+	Expression(115) v125 g4. Expression(127) v115 c8 Expression.onTime(127,100,!4.)c4.r8
+	Expression.onTime(127,115,!2) v127 d4.< v115 a8> Expression.onTime(120,125,!8.)v115 f8gExpression.onTime(125,110,!4)f^8d8
+	Expression(115) v125 e4.<Expression(127) v110 a8 Expression.onTime(127,100,!4.)a4.r8
+
+	Expression(115)v125 b-4^16>Expression(127)v110 cdf Expression(115)v127e4.r8
+	Expression(115)v125 c#4^16 Expression(127)v110 deg Expression(115)v127f4.Expression(125)v115e8
+	Expression(115)v125 d4^16<Expression(127)v110 b->df Expression(115)v125a8b-a^8f8
+	Expression(115)v127 g4.Expression(127)v110 c8 Expression(115)v120c4.r8
+
+	Sub {
+		f4 ^16cfg a8b-a^8f8
+		g4^16ede c4.r8
+		d4 ^16<a>de f8gf^8d8
+		e4^16dec< a4.r8
+		b-4^16>cdf e4.r8
+		c#4^16deg f4.e8
+		d4^16<b->df a8b-a^8f8
+		g4.c8 c4.r8
+	}
+	>
+	f4 ^16cfg a8b-a^8f8
+	g4^16ede c4.r8
+	d4 ^16<a>de f8gf^8d8
+	e4^16dec< a4.r8
+	b-4^16>cdf e4.r8
+	c#4^16deg f4.e8
+	d4^16<b->df a8b-a^8f8
+	g4.c  8 c4.r8
+	<
+
+	//
+
+	d4.>d8 c8<b-8ab-8>
+	c16^4.<f8 f4.r8
+	d4.b-8 a8g8fg8
+	a16^2.r4
+	d4.>d8 c8<b-8ab-8>
+	c16^2 f4e4
+	d2e4f4
+	a2g4.r8
+
+	<
+}
+
+トラック 1;
+音色(Clarinet)
+l16v127q99
+o5
+[4 r1]
+
+LoopPlay(#MELODY)
+
+トラック 2;
+音色(Piccolo)
+l16v120q99
+o6
+[4 r1]
+
+LoopPlay(#MELODY)
+
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+// 前奏
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+トラック 4;
+@1
+l16v95q92
+#PEDALON
+
+Sub { c2 }
+Sub { r32f2}
+>r16c8.^16<cf>c<
+
+#PEDALOFF
+b-8ag8f8g&
+#PEDALON
+g4.e8 
+#PEDALOFF
+a8b-a8.g8
+
+q80
+#PEDALON
+l8.BG(<b-8.>d8.f8.)
+#PEDALOFF
+#PEDALON
+
+l8.BG(<a8.>c8.e8.)
+#PEDALOFF
+#PEDALON
+l8BG(<g8b-8> d8) r2
+
+q95
+>
+Sub{g1}
+Sub{r32b-16.^8^2.}
+Sub{r16>d16^8^2.}
+Sub{r16.f32^8^2.}
+#PEDALOFF
+r1
+
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+// ハープ
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+トラック 6;
+音色(OrchestralHarp)
+[3 r1]
+v60o3q100
+r4
+l32
+gb->df
+gb->df
+gb->df
+gb->df
+gb->df
+gb->df
+
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+// ストリング
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+#TR7={
+	o6
+	e1f1e1f1
+
+	//
+	[8 r1]
+	a1g1f1e1
+	l8
+	d4.fe4fg
+	ab-agfed4
+	b-1^8agfedc4
+
+	[8 r1]
+}
+
+トラック 7;
+音色(Strings1)
+v70o5q100
+[2 r1]
+Sub {r1>f1<}
+f1^1
+>
+LoopPlay(#TR7)
+
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+// ピアノ
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+#TR5={
+	o4
+	@1
+	v80
+	[2
+		#PEDALOFF
+		l8.BG(f8.a8.>c8.e8.<) l16 BG(fa>ce<)
+		r BG(fa>ce<) r BG(fa>ce<)
+		r2
+		l8.BG(g8.b-8.>d8.f8.<) l16 BG(gb->df<)
+		r BG(gb->df<) r BG(gb->df<)
+		r2
+	]
+	>
+//	音色(GrandPiano)
+	//
+	v70
+	<
+	[2
+		l8. BG(a8.>c8.f8.<) l16 BG(a>cf<) rBG(a>cf<) rBG(a>cf<) r2
+		l8. BG(g8.>c8.e8.<) l16 BG(g>ce<) rBG(g>ce<) rBG(g>ce<) r2
+		l8. BG(a8.>d8.f8.<) l16 BG(a>df<) rBG(a>df<) rBG(a>df<) r2
+		l8. BG(a8.>c8.e8.<) l16 BG(a>ce<) rBG(a>ce<) rBG(a>ce<) r2
+		l8. BG(b-8.>d8.f8.<) l16 BG(b->df<) rBG(b->df<) rBG(g>ce<) rrl4.BG(g4.>c4.e4.<)
+		l8. BG(a8.>c#8.e8.<) l16 BG(a>c#e<) rBG(a>c#e<) rBG(a>df<) rrl4.BG(a4.>d4.f4.<)
+		l8. BG(b-8.>d8.f8.<) l16 BG(b->df<) rBG(b->df<) rBG(b->df<) r2
+		l8. BG(g8.>c8.e8.<) l16 BG(g>ce<) rBG(g>ce<) rBG(g>ce<) rrl4.BG(g4.>c4.e4.<)
+	]
+	>
+
+#PEDALOFF
+#PEDALON
+	[2 l4 BG(<b-4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<g4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<a4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<a4>c4f4)]
+#PEDALOFF
+#PEDALON
+
+	[2 BG(<b-4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<g4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[4 BG(<a4>c4f4)]
+
+#PEDALOFF
+#PEDALON
+	[2 BG(<b-4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<g4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<a4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<a4>c4f4)]
+#PEDALOFF
+#PEDALON
+
+	[4 BG(<b-4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[4 BG(<g4>c4e4)]
+#PEDALOFF
+}
+
+トラック 5;
+@2
+q85o4l16v80
+[4 r1]
+
+	o4
+	v80
+	[2
+#PEDALOFF
+		l8. BG(f8.a8.>c8.e8.<) l16 BG(fa>ce<)
+		[ r BG(fa>ce<)]
+		r2
+		l8. BG(g8.b-8.>d8.f8.<) l16 BG(gb->df<)
+		[ r BG(gb->df<)]
+		r2
+	]
+	>
+	//
+	v70
+#PEDALOFF
+	l4
+#PEDALON
+	[4 BG(<a4>c4f4)]
+#PEDALOFF
+#PEDALON
+	[4 BG(<g4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[4 BG(<a4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[4 BG(<a4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<b-4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<g4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<a4>c#4e4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<a4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[4 BG(<b-4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[4 BG(<g4>c4e4)]
+#PEDALOFF
+#PEDALON
+
+	[4 BG(<a4>c4f4)]
+#PEDALOFF
+#PEDALON
+	[4 BG(<g4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[4 BG(<a4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[4 BG(<a4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<b-4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<g4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<a4>c#4e4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<a4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[4 BG(<b-4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[4 BG(<g4>c4e4)]
+
+#PEDALOFF
+#PEDALON
+	[2 BG(<b-4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<g4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<a4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<a4>c4f4)]
+#PEDALOFF
+#PEDALON
+
+	[2 BG(<b-4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<g4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[4 BG(<a4>c4f4)]
+
+#PEDALOFF
+#PEDALON
+	[2 BG(<b-4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<g4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<a4>c4e4)]
+#PEDALOFF
+#PEDALON
+	[2 BG(<a4>c4f4)]
+#PEDALOFF
+#PEDALON
+
+	[4 BG(<b-4>d4f4)]
+#PEDALOFF
+#PEDALON
+	[4 BG(<g4>c4e4)]
+#PEDALOFF
+
+LoopPlay(#TR5,-1)
+
+@3
+l16v95q92
+Tempo=Tempo-5
+BG(<fa>ce) BG(<fa>ce) r BG(<fa>ce)
+Tempo=Tempo-10
+BG(<fa>ce) r BG(<fa>ce) BG(<fa>ce)
+Tempo=Tempo-10
+rBG(<fa>ce)
+Sub {
+l2. BG(<f2.a2.>c2.e2.)
+}
+Tempo=Tempo-10
+r16
+r16
+[8
+Tempo=Tempo-3
+r16
+]
+
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+// イントロのピアノバス
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+トラック 8;
+@4
+o4q80v100
+#PEDALON
+f1
+#PEDALOFF
+#PEDALON
+e2
+#PEDALOFF
+#PEDALON
+a2
+#PEDALOFF
+#PEDALON
+<
+b-8.
+#PEDALOFF
+#PEDALON
+a8.
+#PEDALOFF
+#PEDALON
+g8^2
+c1
+#PEDALOFF
+
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+// ベース
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+#TR9={
+	[4 f4]
+	[4 g4]
+	[4 f4]
+	[2 g4] r8c4.
+
+	[4 f4]
+	[4 e4]
+	[4 d4]
+	[4 c4]
+	[2 <b-4>] [2 c4]
+	[2 <a4>] [2 d4]
+	[4 <b-4>]
+	[4 c4]
+
+	[4 f4]
+	[4 e4]
+	[4 d4]
+	[4 c4]
+	[2 <b-4>] [2 c4]
+	[2 <a4>] [2 d4]
+	[4 <b-4>]
+	[4 c4]
+
+	[2 <b-4>] [2 c4]
+	[2 <a4>] [2 d4]
+	[2 <g4>] [2 c4]
+	[4 f4]
+	[2 <b-4>] [2 c4]
+	[2 <a4>] [2 d4]
+	[4 <b-4>]
+	[4 c4]
+}
+
+トラック 9;
+o3q95v112
+[4 r1]
+
+音色(AcousticBass)
+
+LoopPlay(#TR9)
+
+l16<
+ffrf frff rff2.
+
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+// ドラム
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+Key 0
+
+#TR10={
+	Rythm {
+		[3 'b4h4'h4h4'kh8'b8 ]
+		'b4h4'h4h8'b4.m4.o4.l4.'
+	}
+
+	Rythm {
+		[7 'b4h4''s4h4'h4's4h8'b8 ]
+		[1 'b4h4''s4h4'h8t8m4 ]
+	}
+
+	Rythm {
+		[1 'c4b4h4''s4h4'h4's4h8'b8 ]
+		[6 'b4h4''s4h4'h4's4h8'b8 ]
+		[1 'b4h4''s4h4'h8t8m4 ]
+	}
+
+	Rythm {
+		[1 'c4b4h4''s4h4'h4's4h8'b8 ]
+		[6 'b4h4''s4h4'h4's4h8'b8 ]
+		[1 'b4h4''s4h4'h8t8m4 ]
+	}
+}
+
+トラック 10;
+音色(StandardSet)
+
+v85
+$b{Sub{RandR(999,1728) RandV(120,127) n(BassDrum()),16}r}
+$s{Sub{RandR(999,1728) RandV(110,127) n(Snare()),16}r}
+$p{Sub{RandR(999,1728) RandV(100,127) n(PedalHiHat),16}r}
+$o{Sub{RandR(999,1728) RandV(110,127) n(OpenHiHat),16}r}
+$h{Sub{RandR(999,1728) RandV(110,127) n(ClosedHiHat),16}r}
+$r{Sub{RandR(999,1728) RandV(110,127) n(RideBell),16}r}
+$y{Sub{RandR(999,1728) RandV(110,127) n(Cymbal()),16}r}
+$c{Sub{RandR(999,1728) RandV(110,127) n(Cymbal()),16}r}
+$t{Sub{RandR(999,1728) RandV(120,127) n(Tambourine),16}r}
+$l{Sub{RandR(999,1728) RandV(126,127) n(BellTree),16}r}
+$L{Sub{RandR(999,1728) RandV(120,127) n(85),16}r}
+$k{Sub{RandR(999,1728) RandV(120,127) n(Sticks),16}r}
+
+$m{Sub{RandR(999,1728) RandV(120,127) n(LowTom1),16}r}
+$t{Sub{RandR(999,1728) RandV(120,127) n(MidTom1),16}r}
+
+	r1r1
+
+
+Rythm {
+	c8.y8.c2^8
+	l2.h8b8
+	
+}
+Rythm {
+	[3 'b4h4'h4h4'kh8'b8 ]
+	'b4h4'h4h8'b4.m4.o4.L4.'
+}
+
+Rythm {
+	[7 'b4h4''k4h4'h4'k4h8'b8 ]
+	[1 'b4h4''k4h4'h8t8m4 ]
+}
+
+Rythm {
+	[1 'c4b4h4''k4h4'h4's4h8'b8 ]
+	[6 'b4h4''k4h4'h4's4h8'b8 ]
+	[1 'b4h4''k4h4'h8t8m4 ]
+}
+
+Rythm {
+	[1 'c4b4h4''s4h4'h4's4h8'b8 ]
+	[6 'b4h4''s4h4'h4's4h8'b8 ]
+	[1 'b4h4''s4h4'h8t8m4 ]
+}
+
+LoopPlay(#TR10,-1)
+
+Rythm {
+	'b16k16h16''b8k8h8'
+	'b16k16h16''b8k8h8'
+	'b16k16h16''b8k8h8'
+}
+Sub {
+	Rythm {
+		'b16k16h16''b8k8h8'
+	}
+}
+
+Sub {
+	r8.
+	Expression.onTime(127,30,!1)
+}
+Rythm {
+	r64r64
+	[20 r32]
+}
