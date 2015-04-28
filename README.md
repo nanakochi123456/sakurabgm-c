@@ -36,3 +36,9 @@ IF文で同じファイルで全く違う曲にしてみるのもよいでしょ
 ■その他
 v1.0と名乗っていますが、評価版です。
 詳しいメモリチェック、エラーチェックとか行ないきれていません。
+
+■cSakuraについて
+テキスト音楽サクラのコンソール版が評価のために入っています。
+(c)クジラ飛行机     http://kujirahand.com
+http://oto.chu.jp/
+https://github.com/kujirahand/sakuramml
