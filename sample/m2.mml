@@ -32,6 +32,8 @@
 Int LOOP=3 		//sakurabgm:ループ数の指定,MIN=1,DEFAULT=3,MAX=50
 Tempo 142 		//sakurabgm:曲の速さ,MIN=80=遅い,DEFAULT=142=標準,MAX=300,速い
 Key (0) 		//sakurabgm:調性,MIN=-12,低い,DEFAULT=0=標準,MAX=12=高い
+Int NODTM=1		//sakurabgm:演奏の自然さ,MIN=0=DTM,DEFAULT=1=標準（上手),MAX=3=へたくそ
+
 Str NAME={"編集後記"}
 Str AUTHOR={"なの"}
 Str TIMIDITYCFG={"m2-gmset.cfg=GMセット,m2-opl3+opll.cfg=FM音源"}
@@ -44,7 +46,9 @@ Str CHORD={"A"}
 //
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-REV(100)
+System.TimeBase=10368
+
+//REV(100)
 
 LOOP=LOOP+1
 Int LOOP2=LOOP
@@ -59,6 +63,103 @@ Function LoopPlay(Str Mml, Int count) {
 
 #PEDALON={Sub {r16y64,127}}
 #PEDALOFF={r-32 y64,0 r32}
+
+Function BG(Str MML) {
+　　Str BUF=""
+    Str FIRST=""
+　　Str ML=""
+　　Str M
+　　Str R
+    Str FM
+    Int C=0
+
+　　BUF=""
+    R=""
+　　For(Int i=1; MID(MML, i, 1)!=""; i++) {
+　　　　M=MID(MML, i, 1)
+　　　　IF(M="a"||M="b"||M="c"||M="d"||M="e"||M="f"||M="g") {
+		C++
+	  	IF(C<3) {
+			FIRST=ML
+			ML=FM+M
+			FM=""
+		} ELSE {
+			IF(NODTM=1) {
+		　　　　　　R=R+"r"+Random(384,1024)
+			}
+			IF(NODTM=2) {
+		　　　　　　R=R+"r"+Random(192,512)
+			}
+			IF(NODTM=3) {
+		　　　　　　R=R+"r"+Random(96,384)
+			}
+　　　　		BUF=BUF+"Sub" + CHR(123)+R+ML+CHR(125)
+	　　　　　　ML=M
+		}
+　　　　} ELSE {
+		IF(C>0) {
+　　　　　　	ML=ML+M
+		} ELSE {
+			FM=FM+M
+		}
+　　　　}
+　　}
+　　BUF="Sub"+CHR(123)+FIRST+CHR(125)+BUF+"Sub"+CHR(123)+R+ML+CHR(125)+"r"
+//    Print(BUF)
+//	IF(GAKUHU=1) {
+//		BUF="'"+MML+"'"
+//	}
+　　BUF
+}
+
+Function RandV(Int MIN, Int MAX) {
+	Str MML="v"
+	IF(NODTM>0) {
+		MML=MML+Random(MIN,MAX)
+	} ELSE {
+		MML=MML+#STR((MAX+MIN)/2)
+	}
+//	Print(MML)
+	MML
+}
+
+Str RMML
+Function RandR(Int MIN, Int MAX) {
+	Str MML
+//	Str MML=RMML
+//	RMML=""
+	IF(NODTM>0) {
+		MML=MML+"r"
+		RMML=RMML+"r"
+		Int VALUE=Random(0,10)
+		IF(VALUE<5) {
+			MML=MML+"-"
+		} ELSE {
+			RMML=RMML+"-"
+		}
+		Str RAND
+		IF(NODTM=1) {
+			RAND=Random(MIN,MAX)
+		}
+		IF(NODTM=2) {
+			RAND=Random(MIN / 5 ,MAX / 5)
+		}
+		IF(NODTM=3) {
+			RAND=Random(MIN / 9 ,MAX / 9)
+		}
+		MML=MML+RAND
+		RMML=RMML+RAND
+//		Print(MML)
+		MML
+	}
+}
+
+Function SyncR() {
+	Str MML=RMML
+	RMML=""
+//	Print(MML)
+	MML
+}
 
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 // メロディー
@@ -144,78 +245,63 @@ LoopPlay(#TR2)
 //_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 #TR5={
-	'a>c#e<'r 'a4>c#4e4<'
-	r'g#>c#e<' r'g#>c#e<'
-	r'g>c#e<' 'g4>c#4e4<'
-	r'g#>c#e<' r'g#>c#e<'
+	l8 BG(a>c#e<)r l4 BG(a4>c#4e4<)
+	l8 r BG(g#>c#e<) r BG(g#>c#e<)
+	r BG(g>c#e<) l4 BG(g4>c#4e4<)
+	l8 r BG(g#>c#e<) r BG(g#>c#e<)
 
-	'b8>d8f#8<'r 'b4>d4f#4<'
-	r'a>df#<' r'a>df#<'
-	r4'g#2.>d2.g2.<'
+	l8 BG(b8>d8f#8<)r l4 BG(b4>d4f#4<)
+	l8 r  BG(a>df#<) r l8 BG(a>df#<)
+	r4 l2.BG(g#2.>d2.g2.<)
 
 	//
+	[
+		l8 BG(a>c#e<)r l4 BG(a4>c#4e4<)
+		l8 r BG(g#>c#e<) rBG(g#>c#e<)
+		rBG(g>c#e<) l4 BG(g4>c#4e4<)
+		l8 r BG(g#>c#e<) rBG(g#>c#e<)
 
-	'a>c#e<'r 'a4>c#4e4<'
-	r'g#>c#e<' r'g#>c#e<'
-	r'g>c#e<' 'g4>c#4e4<'
-	r'g#>c#e<' r'g#>c#e<'
+		BG(a>df#<)r l4 BG(a4>d4f#4<)
+		l8 r BG(a>df#<) rBG(a>df#<)
+		rBG(a>df#<) l4 BG(a4>d4f#4<)
+		l8 r BG(a>df#<) rBG(a>df#<)
 
-	'a>df#<'r 'a4>d4f#4<'
-	r'a>df#<' r'a>df#<'
-	r'a>df#<' 'a4>d4f#4<'
-	r'a>df#<' r'a>df#<'
-
-	'b>df#<'r 'b4>d4f#4<'
-	r'b>df#<' r'b>df#<'
-	r'g#>df#<' 'g#4>d4f#4<'
-	r'g#>df#<' r'g#>df<'
-
-	'a>c#e<'r 'a4>c#4e4<'
-	r'a>c#e<' r'a>c#e<'
-	r'b>df#<' 'b4>d4f#4<'
-	r'g#>df#<' r'g#>df<'
-
-	'a>c#e<'r 'a4>c#4e4<'
-	r'g#>c#e<' r'g#>c#e<'
-	r'g>c#e<' 'g4>c#4e4<'
-	r'g#>c#e<' r'g#>c#e<'
-
-	'a>df#<'r 'a4>d4f#4<'
-	r'a>df#<' r'a>df#<'
-	r'a>df#<' 'a4>d4f#4<'
-	r'a>df#<' r'a>df#<'
-
-	'b>df#<'r 'b4>d4f#4<'
-	r'b>df#<' r'b>df#<'
-	r'g#>df#<' 'g#4>d4f#4<'
-	r'g#>df#<' r'g#>df<'
-
-	'a>c#e<'r 'a4>c#4e4<'
-	r'a>c#e<' r'a>c#e<'
-	r'a>c#e<' 'a4>c#4e4<'
-	r'a>c#e<' r'a>c#e<'
+		BG(b>df#<)r l4 BG(b4>d4f#4<)
+		l8r BG(b>df#<) rBG(b>df#<)
+		rBG(g#>df#<) l4 BG(g#4>d4f#4<)
+		l8r BG(g#>df#<) rBG(g#>df<)
+		:
+		BG(a>c#e<)r l4 BG(a4>c#4e4<)
+		l8r BG(a>c#e<) rBG(a>c#e<)
+		rBG(b>df#<) l4 BG(b4>d4f#4<)
+		l8rBG(g#>df#<) rBG(g#>df<)
+	]
+	BG(a>c#e<)r l4 BG(a4>c#4e4<)
+	l8 rBG(a>c#e<) rBG(a>c#e<)
+	rBG(a>c#e<) l4 BG(a4>c#4e4<)
+	l8 rBG(a>c#e<) rBG(a>c#e<)
 
 
 	[2
-		'a>df#<'r 'a4>d4f#4<'
-		r'a>df#<' r'a>df#<'
-		r'a>df#<' 'a4>d4f#4<'
-		r'a>df#<' r'a>df<'
+		l8BG(a>df#<)r l4BG(a4>d4f#4<)
+		l8rBG(a>df#<) rBG(a>df#<)
+		rBG(a>df#<) l4BG(a4>d4f#4<)
+		l8rBG(a>df#<) rBG(a>df<)
 
-		'a>c#e<'r 'a4>c#4e4<'
-		r'a>c#e<' r'a>c#e<'
-		r'a>c#e<' 'a4>c#4e4<'
-		r'a>c#e<' r'a>c#e<'
+		BG(a>c#e<)r l4BG(a4>c#4e4<)
+		l8rBG(a>c#e<) rBG(a>c#e<)
+		rBG(a>c#e<) l4BG(a4>c#4e4<)
+		l8rBG(a>c#e<) rBG(a>c#e<)
 
-		'b>df#<'r 'b4>d4f#4<'
-		r'b>df#<' r'b>df#<'
-		r'g#>df#<' 'g#4>d4f#4<'
-		r'g#>df#<' r'g#>df<'
+		BG(b>df#<)r l4BG(b4>d4f#4<)
+		l8rBG(b>df#<) rBG(b>df#<)
+		rBG(g#>df#<) l4BG(g#4>d4f#4<)
+		l8rBG(g#>df#<) rBG(g#>df<)
 
-		'a>c#e<'r 'a4>c#4e4<'
-		r'a>c#e<' r'a>c#e<'
-		r'a>c#e<' 'a4>c#4e4<'
-		r'a>c#e<' r'a>c#e<'
+		BG(a>c#e<)r l4BG(a4>c#4e4<)
+		l8rBG(a>c#e<) rBG(a>c#e<)
+		rBG(a>c#e<) l4BG(a4>c#4e4<)
+		l8rBG(a>c#e<) rBG(a>c#e<)
 
 	]
 }
@@ -285,17 +371,18 @@ LoopPlay(#TR9)
 
 トラック 10;
 Key 0
-$m{n(MidTom2),}
-$l{n(LowTom1),}
-$t{n(HighTom1),}
-$b{n(Kick1),}
-$s{n(Snare1),}
-$S{n(Snare2),}
+音色(StandardSet2)
+$l{Sub{RandR(999,1728) RandV(120,127) n(LowTom1),16}r}
+$m{Sub{RandR(999,1728) RandV(120,127) n(MidTom2),16}r}
+$t{Sub{RandR(999,1728) RandV(120,127) n(HighTom1),16}r}
+$b{Sub{RandR(999,1728) RandV(120,127) n(Kick1),16}r}
+$s{Sub{RandR(999,1728) RandV( 90,100) n(Snare2),16}r}
+$S{Sub{RandR(999,1728) RandV(120,127) n(Snare2),16}r}
 
 //$t{n(Tambourine),}
-$h{n(MuteTriangle),}
-$o{n(OpenTriangle),}
-$c{n(ChineseCymbal),}
+$h{Sub{RandR(999,1728) RandV(100,110) n(MuteTriangle),16}r}
+$o{Sub{RandR(999,1728) RandV(100,115) n(OpenTriangle),16}r}
+$c{Sub{RandR(999,1728) RandV(120,127) n(ChineseCymbal),16}r}
 
 #r1={
 	Sub {

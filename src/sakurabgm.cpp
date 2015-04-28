@@ -1,3 +1,4 @@
+// sakurabgm replacer by nano
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,8 +13,11 @@
 #define	SAKURABGM_PARMERROR		6
 #define	SAKURABGM_PARMKEYERROR	7
 
-#define	STRLENGTH	512
+#define	STRLENGTH		512
+#define	STRLENGTH_L		4096
 #define	TMPSTRLENGTH	100000
+#define HASHSIZE	4096
+#define HASHKEYSIZE	256
 
 const char *errormsg[]={
 	"",
@@ -83,20 +87,33 @@ sakurabgm replace [input mmlfile] [output mmlfile] ....=.. ....=..\n\
 ");
 }
 
-#define HASHSIZE	4096
-#define HASHKEYSIZE	256
 typedef struct sbgmlist {
 	char		_keyword[HASHKEYSIZE];
-	char		_comment[STRLENGTH];
+	char		*_values;
+	char		*_comment;
 	int			_value;
 	int			_minvalue;
-	char		_mindesc[STRLENGTH];
+	char		*_mindesc;
 	int			_default;
-	char		_defdesc[STRLENGTH];
+	char		*_defdesc;
 	int			_maxvalue;
-	char		_maxdesc[STRLENGTH];
+	char		*_maxdesc;
 } sbgmlist;
 sbgmlist	*sbgmhash[HASHSIZE];
+
+int strrep(char *buf, char *before, char *after)
+{
+    char *tmp;
+    size_t beforelen, afterlen;
+    
+    beforelen = strlen(before);
+    afterlen = strlen(after);
+    if (beforelen == 0 || (tmp = strstr(buf, before)) == NULL) return 0;
+    memmove(tmp + afterlen, tmp + beforelen, strlen(buf) - (tmp + beforelen - buf ) + 1);
+    memcpy(tmp, after, afterlen);
+    return 1;
+}
+
 
 sbgmlist *searchsbgmhash(char *keyword) {
 	sbgmlist	*p;
@@ -108,24 +125,45 @@ sbgmlist *searchsbgmhash(char *keyword) {
 	return NULL;
 }
 
-int	addsbgmhash(char *keyword, char *comment, int value, int minvalue, char *mindesc, int def, char *defdesc, int maxvalue, char *maxdesc) {
+int	addsbgmhash(char *keyword, char *values, char *comment, int value, int minvalue, char *mindesc, int def, char *defdesc, int maxvalue, char *maxdesc) {
 	sbgmlist	*p;
 	int		i;
 	p=searchsbgmhash(keyword);
 	if(p == NULL) {
 		for(i = 0; sbgmhash[i] != NULL && i < HASHSIZE; i++);
-		p=(sbgmlist *)memalloc(sizeof(sbgmlist) + 1);
+		p=(sbgmlist *)memalloc(sizeof(sbgmlist) + sizeof(size_t));
 		sbgmhash[i]=p;
 	}
 	strcpy(p->_keyword, keyword);
-	strcpy(p->_comment, comment);
+	if(values != NULL) {
+		p->_values=(char *)memalloc(strlen(values));
+		strcpy(p->_values, values);
+	} else p->_values = NULL;
+	if(comment != NULL) {
+		p->_comment=(char *)memalloc(strlen(comment));
+		strcpy(p->_comment, comment);
+	} else p->_comment = NULL;
 	p->_value=value;
 	p->_minvalue=minvalue;
-	strcpy(p->_mindesc, mindesc);
+
+	if(mindesc != NULL) {
+		p->_mindesc=(char *)memalloc(strlen(mindesc));
+		strcpy(p->_mindesc, mindesc);
+	} else p->_mindesc = NULL;
+
 	p->_default=def;
-	strcpy(p->_defdesc, defdesc);
+
+	if(defdesc != NULL) {
+		p->_defdesc=(char *)memalloc(strlen(defdesc));
+		strcpy(p->_defdesc, defdesc);
+	} else p->_defdesc=NULL;
+
 	p->_maxvalue=maxvalue;
-	strcpy(p->_maxdesc, maxdesc);
+
+	if(maxdesc != NULL) {
+		p->_maxdesc=(char *)memalloc(strlen(maxdesc));
+		strcpy(p->_maxdesc, maxdesc);
+	} else p->_maxdesc = NULL;
 }
 
 char *readmml(char *file) {
@@ -152,7 +190,6 @@ char	*tokens_mml[]={
 	NULL
 };
 
-/*
 char	*tokens_sys[]= {
 	(char *)"Str NAME={\".*\"}",
 	(char *)"Str AUTHOR={\".*\"}",
@@ -166,7 +203,7 @@ char	*tokens_sys[]= {
 	(char *)"Str CHORD={\".*\"}",
 	NULL
 };
-*/
+
 char	_tmp[TMPSTRLENGTH];
 
 char	*sakurabgmparm(char *keyword, char *str, int desc) {
@@ -223,13 +260,13 @@ char	*sakurabgm_list(char *MML) {
 	char	ss[STRLENGTH];
 	char	kk[STRLENGTH];
 	int		_value, _minvalue, _default, _maxvalue;
-	char	_comment[STRLENGTH];
+	char	_comment[STRLENGTH_L];
 	char	_mindesc[STRLENGTH], _defdesc[STRLENGTH], _maxdesc[STRLENGTH];
 
 	tok=strtok(MML, "\n");
 	while(tok != NULL) {
 		for(i=0; tokens_mml[i] != NULL; i++) {
-			if(regcomp(&preg, tokens_mml[i], REG_EXTENDED | REG_NEWLINE ) != 0 ) {
+			if(regcomp(&preg, tokens_mml[i], REG_EXTENDED | REG_NEWLINE )) {
 				sakurabgm_error(SAKURABGM_REGEXERROR, tokens_mml[i]);
 			}
 			if((rc=regexec( &preg, tok, 3, pmatch, 0 )) != REG_NOMATCH) {
@@ -257,7 +294,7 @@ char	*sakurabgm_list(char *MML) {
 						strcpy(_maxdesc, sakurabgmparm((char *)"MAX", tok, 1));
 						strcpy(_comment, sakurabgmparm((char *)"COMMENT", tok, 0));
 
-						addsbgmhash(kk, _comment, _value, _minvalue, _mindesc, _default, _defdesc, _maxvalue, _maxdesc);
+						addsbgmhash(kk, NULL, _comment, _value, _minvalue, _mindesc, _default, _defdesc, _maxvalue, _maxdesc);
 					}
 					if((t=strstr(tok, "Tempo ")) != NULL) {
 						// 値の取得
@@ -276,7 +313,7 @@ char	*sakurabgm_list(char *MML) {
 						strcpy(_maxdesc, sakurabgmparm((char *)"MAX", tok, 1));
 						strcpy(_comment, sakurabgmparm((char *)"COMMENT", tok, 0));
 
-						addsbgmhash((char *)"Tempo", _comment, _value, _minvalue, _mindesc, _default, _defdesc, _maxvalue, _maxdesc);
+						addsbgmhash((char *)"Tempo", NULL, _comment, _value, _minvalue, _mindesc, _default, _defdesc, _maxvalue, _maxdesc);
 					}
 					if((t=strstr(tok, "Key (")) != NULL) {
 						// 値の取得
@@ -295,28 +332,41 @@ char	*sakurabgm_list(char *MML) {
 						strcpy(_maxdesc, sakurabgmparm((char *)"MAX", tok, 1));
 						strcpy(_comment, sakurabgmparm((char *)"COMMENT", tok, 0));
 
-						addsbgmhash((char *)"Key", _comment, _value, _minvalue, _mindesc, _default, _defdesc, _maxvalue, _maxdesc);
+						addsbgmhash((char *)"Key", NULL, _comment, _value, _minvalue, _mindesc, _default, _defdesc, _maxvalue, _maxdesc);
+					}
+				}
+			}
+			regfree(&preg);
+		}
+		for(i=0; tokens_sys[i] != NULL; i++) {
+			if(regcomp(&preg, tokens_sys[i], REG_EXTENDED | REG_NEWLINE )) {
+				sakurabgm_error(SAKURABGM_REGEXERROR, tokens_sys[i]);
+			}
+			if((rc=regexec( &preg, tok, 3, pmatch, 0 )) != REG_NOMATCH) {
+				for(j=0; j<3; j++) {
+					if((t=strstr(tok, "Str ")) != NULL) {
+						// キーの取得
+						for(k=0; k<4; k++)
+							t++;
+						for(s=kk; *t != '='; t++, s++) {
+							*s=*t;
+						}
+						*s='\0';
+						t++;
+						// 値の取得
+						strcpy(_comment, t);
+						strrep(_comment, (char *)"{\"", (char *)"");
+						strrep(_comment, (char *)"\"}", (char *)"");
+						addsbgmhash(kk, _comment, NULL, 0, 0, NULL, 0, NULL, 0, NULL);
 					}
 				}
 			}
 			regfree(&preg);
 		}
 		tok=strtok(NULL, "\n");
+
 	}
 
-}
-
-int strrep(char *buf, char *before, char *after)
-{
-    char *tmp;
-    size_t beforelen, afterlen;
-    
-    beforelen = strlen(before);
-    afterlen = strlen(after);
-    if (beforelen == 0 || (tmp = strstr(buf, before)) == NULL) return 0;
-    memmove(tmp + afterlen, tmp + beforelen, strlen(buf) - (tmp + beforelen - buf ) + 1);
-    memcpy(tmp, after, afterlen);
-    return 1;
 }
 
 void	sakurabgm_replace(char *buf, char *str, char *key, char *value) {
@@ -327,16 +377,32 @@ void	sakurabgm_replace(char *buf, char *str, char *key, char *value) {
 	tok=strtok(str, "\n");
 	*buf=0;
 	while(tok != NULL) {
+		sbgmlist *p;
+		*tmp1='\0';
+		*tmp2='\0';
+		if(searchsbgmhash(key) == NULL)
+			sakurabgm_error(SAKURABGM_PARMKEYERROR, key);
+
+		if(searchsbgmhash(key)->_values != NULL)
+			sakurabgm_error(SAKURABGM_PARMKEYERROR, key);
+
 		if(!strcmp(key, (char *)"Tempo")) {
+			p=searchsbgmhash(key);
+			if(p == NULL) {
+				sakurabgm_error(SAKURABGM_PARMKEYERROR, key);
+			}
 			sprintf(tmp1, "Tempo %d"
 				, searchsbgmhash((char *)"Tempo")->_default);
 			sprintf(tmp2, "Tempo %s", value);
 		} else if(!strcmp(key, (char *)"Key")) {
+			p=searchsbgmhash(key);
+			if(p == NULL) {
+				sakurabgm_error(SAKURABGM_PARMKEYERROR, key);
+			}
 			sprintf(tmp1, "Key (%d)"
 				, searchsbgmhash((char *)"Key")->_default);
 			sprintf(tmp2, "Key (%s)", value);
 		} else {
-			sbgmlist *p;
 			p=searchsbgmhash(key);
 			if(p == NULL) {
 				sakurabgm_error(SAKURABGM_PARMKEYERROR, key);
@@ -345,10 +411,12 @@ void	sakurabgm_replace(char *buf, char *str, char *key, char *value) {
 				, key, searchsbgmhash(key)->_default);
 			sprintf(tmp2, "Int %s=%s", key, value);
 		}
-		strcpy(tmp3, tok);
-		strrep(tmp3, tmp1, tmp2);
-		strcat(tmp3, "\n");
-		strcat(buf, tmp3);
+		if(*tmp1 != '\0') {
+			strcpy(tmp3, tok);
+			strrep(tmp3, tmp1, tmp2);
+			strcat(tmp3, "\n");
+			strcat(buf, tmp3);
+		}
 		tok=strtok(NULL, "\n");
 	}
 }
@@ -365,7 +433,12 @@ int sakurabgm(int argc, char * argv[]) {
 			int	i;
 			for(i = 0; sbgmhash[i] != NULL && i < HASHSIZE; i++) {
 				p=sbgmhash[i];
-				printf("%s=%d DEF=%d/%s MIN=%d/%s MAX=%d/%s\n", p->_keyword, p->_value, p->_default, p->_defdesc, p->_minvalue, p->_mindesc, p->_maxvalue, p->_maxdesc);	}
+				if(p->_defdesc != NULL) {
+					printf("%s=%d DEF=%d/%s MIN=%d/%s MAX=%d/%s\n", p->_keyword, p->_value, p->_default, p->_defdesc, p->_minvalue, p->_mindesc, p->_maxvalue, p->_maxdesc);
+				} else {
+					printf("%s=%s\n", p->_keyword, p->_values);
+				}
+			}
 		}
 		if (strcmp(argv[1], "replace") == 0) {
 			if ((MML = readmml(argv[2])) == NULL) {
